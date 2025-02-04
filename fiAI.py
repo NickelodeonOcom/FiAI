@@ -17,16 +17,17 @@ def get_stock_data(ticker, period='1y'):
     df = stock.history(period=period)
     df = dropna(df)
     df = add_all_ta_features(df, open='Open', high='High', low='Low', close='Close', volume='Volume')
-    return df[['Close', 'volume_adi', 'momentum_rsi', 'trend_macd', 'volatility_bbp']].fillna(0)
+    df = df[['Close', 'volume_adi', 'momentum_rsi', 'trend_macd', 'volatility_bbp']].fillna(0)
+    return df
 
 # Prepare data for training
 def prepare_data(df, time_steps=60):
-    scaler = MinMaxScaler()
+    scaler = MinMaxScaler(feature_range=(0, 1))
     scaled_data = scaler.fit_transform(df)
     X, y = [], []
-    for i in range(len(scaled_data) - time_steps):
-        X.append(scaled_data[i:i+time_steps])
-        y.append(scaled_data[i+time_steps, 0])
+    for i in range(time_steps, len(scaled_data)):
+        X.append(scaled_data[i - time_steps:i])
+        y.append(scaled_data[i, 0])  # Predict the 'Close' price
     return np.array(X), np.array(y), scaler
 
 # Build optimized LSTM model
@@ -43,7 +44,7 @@ def build_model(input_shape):
 # Train model
 def train_model(ticker):
     df = get_stock_data(ticker)
-    X, y, scaler = prepare_data(df)
+    X, y, scaler = prepare_data(df[['Close', 'volume_adi', 'momentum_rsi', 'trend_macd', 'volatility_bbp']])
     model = build_model((X.shape[1], X.shape[2]))
     model.fit(X, y, epochs=20, batch_size=32, verbose=1)
     return model, scaler
@@ -51,7 +52,7 @@ def train_model(ticker):
 # Predict next price
 def predict_next_price(model, scaler, ticker):
     df = get_stock_data(ticker, period='70d')
-    X, _, _ = prepare_data(df)
+    X, _, _ = prepare_data(df[['Close', 'volume_adi', 'momentum_rsi', 'trend_macd', 'volatility_bbp']])
     prediction = model.predict(X[-1].reshape(1, X.shape[1], X.shape[2]))
     return scaler.inverse_transform(np.concatenate((prediction, np.zeros((1, X.shape[2] - 1))), axis=1))[0][0]
 
