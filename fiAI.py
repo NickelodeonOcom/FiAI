@@ -25,10 +25,17 @@ def prepare_data(df, time_steps=60):
     scaler = MinMaxScaler(feature_range=(0, 1))
     scaled_data = scaler.fit_transform(df)
     X, y = [], []
+    
+    # Ensure that the range and index are correctly aligned
     for i in range(time_steps, len(scaled_data)):
-        X.append(scaled_data[i - time_steps:i])
-        y.append(scaled_data[i, 0])  # Predict the 'Close' price
-    return np.array(X), np.array(y), scaler
+        X.append(scaled_data[i - time_steps:i])  # Last 60 days of data as input features
+        y.append(scaled_data[i, 0])  # Predict the 'Close' price (first column)
+    
+    # Convert to numpy arrays
+    X = np.array(X)
+    y = np.array(y)
+    
+    return X, y, scaler
 
 # Build optimized LSTM model
 def build_model(input_shape):
@@ -44,16 +51,23 @@ def build_model(input_shape):
 # Train model
 def train_model(ticker):
     df = get_stock_data(ticker)
+    
+    # Ensure we pass only the relevant columns for training
     X, y, scaler = prepare_data(df[['Close', 'volume_adi', 'momentum_rsi', 'trend_macd', 'volatility_bbp']])
-    model = build_model((X.shape[1], X.shape[2]))
+    
+    model = build_model((X.shape[1], X.shape[2]))  # Correct input shape
     model.fit(X, y, epochs=20, batch_size=32, verbose=1)
     return model, scaler
 
 # Predict next price
 def predict_next_price(model, scaler, ticker):
     df = get_stock_data(ticker, period='70d')
+    
+    # Prepare the data for prediction
     X, _, _ = prepare_data(df[['Close', 'volume_adi', 'momentum_rsi', 'trend_macd', 'volatility_bbp']])
-    prediction = model.predict(X[-1].reshape(1, X.shape[1], X.shape[2]))
+    
+    # Predict the last available time step
+    prediction = model.predict(X[-1].reshape(1, X.shape[1], X.shape[2]))  # Predict the next closing price
     return scaler.inverse_transform(np.concatenate((prediction, np.zeros((1, X.shape[2] - 1))), axis=1))[0][0]
 
 # Real-time stock prediction using WebSockets
@@ -93,3 +107,4 @@ if st.button("Start Real-Time Streaming"):
 # Deployment instructions for Google Cloud
 if __name__ == "__main__":
     st.write("App is running. Deploy using Google Cloud App Engine.")
+
