@@ -9,4 +9,3 @@ streamlit
 websocket-client
 pyQt6
 pyqtgraph
-sys
