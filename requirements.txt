@@ -7,3 +7,4 @@ ta
 requests
 streamlit
 websocket-client
+pyQt6
