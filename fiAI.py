@@ -2,41 +2,49 @@ import yfinance as yf
 import numpy as np
 import streamlit as st
 import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+import pandas as pd
 
-def fetch_stock_data(ticker):
+
+def fetch_stock_data(ticker, interval="1d", period="1mo"):
     stock = yf.Ticker(ticker)
-    data = stock.history(period="5d", interval="1h")
+    data = stock.history(period=period, interval=interval)
     return stock, data
 
+
 def calculate_trend(data):
-    recent_close = data["Close"].iloc[-5:].values
+    recent_close = data["Close"].values[-10:]
     trend = np.polyfit(range(len(recent_close)), recent_close, 1)[0]
     return trend
+
 
 def predict_stock_movement(ticker):
     stock, data = fetch_stock_data(ticker)
     if data.empty:
         return None
     stock_name = stock.info.get("shortName", ticker)
-    today_data = data.loc[data.index.date == data.index[-1].date()]
-    current_price = today_data["Close"].iloc[-1]
-    open_price = today_data["Open"].iloc[0]
-    price_change = current_price - open_price
-    percentage_change = price_change / open_price
+    current_price = data["Close"].iloc[-1]
     past_high = data["High"].max()
     past_low = data["Low"].min()
     volatility_weight = (past_high - past_low) / past_high
-    np.random.seed(42)
-    simulated_prices = np.random.normal(
-        loc=current_price,
-        scale=current_price * abs(percentage_change) * volatility_weight,
-        size=1000
-    )
-    predicted_high = np.percentile(simulated_prices, 95)
-    predicted_low = np.percentile(simulated_prices, 5)
+
+    # Feature engineering for ML model
+    data["Day"] = range(len(data))
+    X = data[["Day"]].values
+    y = data["Close"].values
+
+    # Train simple linear regression model
+    model = LinearRegression()
+    model.fit(X, y)
+    future_days = np.array([[len(data) + i] for i in range(1, 6)])
+    predicted_prices = model.predict(future_days)
+    predicted_high = max(predicted_prices)
+    predicted_low = min(predicted_prices)
+
     trend = calculate_trend(data)
     prediction = "Up" if trend > 0 else "Down"
-    return stock_name, current_price, predicted_high, predicted_low, prediction, data
+    return stock_name, current_price, predicted_high, predicted_low, prediction, data, predicted_prices
+
 
 # Streamlit UI
 st.title("FiAI-n1")
@@ -45,14 +53,22 @@ ticker = st.text_input("Enter Stock Ticker (e.g., AAPL, TSLA)", "AAPL").strip().
 if st.button("Predict"):
     result = predict_stock_movement(ticker)
     if result:
-        stock_name, price, high, low, movement, data = result
-        st.write(f"**{stock_name} ({ticker}) - Current Price:** ${price:.2f}")
-        st.write(f"**Predicted High:** ${high:.2f}   |    Predicted Low: ${low:.2f}   |   **Movement:** {movement.upper()}")
-        st.subheader("Stock Price Trend")
+        stock_name, price, high, low, movement, data, predicted_prices = result
+        st.markdown(f"### <span style='color:blue'>{stock_name} ({ticker}) - Current Price:</span> **${price:.2f}**",
+                    unsafe_allow_html=True)
+        st.write(
+            f"**Predicted High (Next 5 Days):** ${high:.2f}   |    Predicted Low: ${low:.2f}   |   **Movement:** {movement.upper()}")
+
+        # Stock Price Trend & Prediction graph
+        st.subheader("Stock Price Trend & Prediction")
         fig, ax = plt.subplots()
         ax.plot(data.index, data["Close"], label="Close Price", color='blue')
+        future_dates = pd.date_range(start=data.index[-1], periods=6, freq='D')[1:]
+        ax.plot(future_dates, predicted_prices, label="Predicted Prices", linestyle="dashed", color='red')
         ax.set_xlabel("Time")
         ax.set_ylabel("Price ($)")
+        ax.set_title(f"Stock Price Trend for {stock_name} ({ticker})")
+        ax.grid(True, linestyle='--', alpha=0.6)
         ax.legend()
         st.pyplot(fig)
     else:
