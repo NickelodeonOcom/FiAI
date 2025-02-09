@@ -1,12 +1,4 @@
 yfinance
-pandas
 numpy
-tensorflow
-scikit-learn
-ta
-requests
 streamlit
-websocket-client
-pyQt6
-pyqtgraph
 matplotlib
