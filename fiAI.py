@@ -38,7 +38,7 @@ def predict_stock_movement(ticker):
     return current_price, predicted_high, predicted_low, prediction, data
 
 # Streamlit UI
-st.title("Stock Predictor App")
+st.title("FiAI-n1")
 ticker = st.text_input("Enter Stock Ticker (e.g., AAPL, TSLA)", "AAPL").strip().upper()
 
 if st.button("Predict"):
