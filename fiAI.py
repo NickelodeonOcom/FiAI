@@ -46,7 +46,7 @@ if st.button("Predict"):
     if result:
         price, high, low, movement, data = result
         st.write(f"**Current Price:** ${price:.2f}")
-        st.write(f"**Predicted High:** ${high:.2f} | Predicted Low: ${low:.2f} | **Movement:** {movement}")
+        st.write(f"**Predicted High:** ${high:.2f}   |    Predicted Low: ${low:.2f}   |   **Movement:** {movement.upper()}")
         st.subheader("Stock Price Trend")
         fig, ax = plt.subplots()
         ax.plot(data.index, data["Close"], label="Close Price", color='blue')
