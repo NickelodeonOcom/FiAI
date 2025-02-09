@@ -115,9 +115,6 @@ st.sidebar.header("Stock Prediction Settings")
 ticker = st.sidebar.text_input("Enter Stock Ticker (e.g., AAPL, TSLA)", "AAPL").strip().upper()
 prediction_days = st.sidebar.slider('Select Prediction Days', min_value=1, max_value=30, value=5)
 
-# Dark Mode Toggle
-dark_mode = st.sidebar.checkbox("Enable Dark Mode", value=True)
-
 # Display Stock Prediction Button
 if st.sidebar.button("Predict Stock"):
     result = predict_stock_movement(ticker, prediction_days)
