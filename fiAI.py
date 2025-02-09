@@ -88,9 +88,9 @@ def plot_stock_chart(data, predicted_prices, future_dates, stock_name, ticker):
 
     # Add Moving Averages
     fig.add_trace(
-        go.Scatter(x=data.index, y=data['SMA_20'], mode='lines', name='SMA 20', line=dict(color='green', width=2)))
+        go.Scatter(x=data.index, y=data['SMA_20'], mode='lines', name='Simple Moving Average 20', line=dict(color='green', width=2)))
     fig.add_trace(
-        go.Scatter(x=data.index, y=data['EMA_20'], mode='lines', name='EMA 20', line=dict(color='orange', width=2)))
+        go.Scatter(x=data.index, y=data['EMA_20'], mode='lines', name='Exponential Moving Average 20', line=dict(color='orange', width=2)))
 
     # Update layout
     fig.update_layout(
