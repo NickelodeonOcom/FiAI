@@ -2,7 +2,6 @@ import yfinance as yf
 import numpy as np
 import streamlit as st
 import matplotlib.pyplot as plt
-from sklearn.linear_model import LinearRegression
 import pandas as pd
 
 
@@ -18,6 +17,20 @@ def calculate_trend(data):
     return trend
 
 
+def linear_regression(X, y):
+    # Simple linear regression calculation using numpy
+    X_mean = np.mean(X)
+    y_mean = np.mean(y)
+
+    # Calculate slope (m) and intercept (b)
+    numerator = np.sum((X - X_mean) * (y - y_mean))
+    denominator = np.sum((X - X_mean) ** 2)
+    m = numerator / denominator
+    b = y_mean - m * X_mean
+
+    return m, b
+
+
 def predict_stock_movement(ticker):
     stock, data = fetch_stock_data(ticker)
     if data.empty:
@@ -28,16 +41,17 @@ def predict_stock_movement(ticker):
     past_low = data["Low"].min()
     volatility_weight = (past_high - past_low) / past_high
 
-    # Feature engineering for ML model
+    # Feature engineering for manual linear regression
     data["Day"] = range(len(data))
-    X = data[["Day"]].values
+    X = data["Day"].values
     y = data["Close"].values
 
-    # Train simple linear regression model
-    model = LinearRegression()
-    model.fit(X, y)
-    future_days = np.array([[len(data) + i] for i in range(1, 6)])
-    predicted_prices = model.predict(future_days)
+    # Calculate linear regression coefficients
+    m, b = linear_regression(X, y)
+
+    # Predict future prices
+    future_days = np.array([len(data) + i for i in range(1, 6)])
+    predicted_prices = m * future_days + b
     predicted_high = max(predicted_prices)
     predicted_low = min(predicted_prices)
 
