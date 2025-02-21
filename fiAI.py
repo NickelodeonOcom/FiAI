@@ -112,7 +112,8 @@ st.set_page_config(page_title="FiAI-n2 Stock Prediction", layout="wide")
 
 # Add logo and title
 st.image("FiAI-logo.png", width=200)  # Replace "path_to_logo_image.png" with the path to your logo image
-st.title("📈 FiAI-n2 - Stock Price Predictor")
+st.title("FiAI-n2")
+st.title("Stock Prediction tool")
 
 # Sidebar for user input
 st.sidebar.header("Stock Prediction Settings")
