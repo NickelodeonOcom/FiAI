@@ -105,10 +105,10 @@ def plot_stock_chart(data, predicted_prices, future_dates, stock_name, ticker):
 
 
 # Streamlit UI
-st.set_page_config(page_title="FiAI-n1 Stock Prediction", layout="wide")
+st.set_page_config(page_title="FiAI-n2 Stock Prediction", layout="wide")
 
 # Add logo and title
-st.title("📈 FiAI-n1 - Stock Price Predictor")
+st.title("📈 FiAI-n2 - Stock Price Predictor")
 
 # Sidebar for user input
 st.sidebar.header("Stock Prediction Settings")
@@ -151,7 +151,7 @@ if st.sidebar.button("Show Portfolio"):
 # Footer with styling
 st.markdown("""
 <footer style="text-align: center; padding: 10px;">
-    <p style="color: #888888; font-size: 14px;">Made by FiAI-n1. Powered by Streamlit and Yahoo Finance.</p>
+    <p style="color: #888888; font-size: 14px;">Made by FiAI-n2. Powered by Streamlit and Yahoo Finance.</p>
 </footer>
 """, unsafe_allow_html=True)
 
