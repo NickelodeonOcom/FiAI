@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 import ta  # For technical analysis indicators
 import random
 
+
 # Function to fetch stock data
 def fetch_stock_data(ticker, interval="1d", period="1mo"):
     stock = yf.Ticker(ticker)
@@ -88,9 +89,11 @@ def plot_stock_chart(data, predicted_prices, future_dates, stock_name, ticker):
 
     # Add Moving Averages
     fig.add_trace(
-        go.Scatter(x=data.index, y=data['SMA_20'], mode='lines', name='Simple Moving Average 20', line=dict(color='green', width=2)))
+        go.Scatter(x=data.index, y=data['SMA_20'], mode='lines', name='Simple Moving Average 20',
+                   line=dict(color='green', width=2)))
     fig.add_trace(
-        go.Scatter(x=data.index, y=data['EMA_20'], mode='lines', name='Exponential Moving Average 20', line=dict(color='orange', width=2)))
+        go.Scatter(x=data.index, y=data['EMA_20'], mode='lines', name='Exponential Moving Average 20',
+                   line=dict(color='orange', width=2)))
 
     # Update layout
     fig.update_layout(
@@ -108,6 +111,7 @@ def plot_stock_chart(data, predicted_prices, future_dates, stock_name, ticker):
 st.set_page_config(page_title="FiAI-n2 Stock Prediction", layout="wide")
 
 # Add logo and title
+st.image("FiAI-logo.png", width=200)  # Replace "path_to_logo_image.png" with the path to your logo image
 st.title("📈 FiAI-n2 - Stock Price Predictor")
 
 # Sidebar for user input
@@ -149,25 +153,25 @@ if st.sidebar.button("Show Portfolio"):
     st.write(portfolio_data)
 
 # Footer with styling
-st.markdown("""
+st.markdown("""  
 <footer style="text-align: center; padding: 10px;">
     <p style="color: #888888; font-size: 14px;">Made by FiAI-n2. Powered by Streamlit and Yahoo Finance.</p>
 </footer>
 """, unsafe_allow_html=True)
 
-
-# Stock Comarison Tool
+# Stock Comparison Tool
 st.sidebar.header("Stock Comparison")
 compare_tickers = st.sidebar.text_area("Enter tickers to compare (comma separated)", "AAPL, TSLA")
 if st.sidebar.button("Compare Stocks"):
     compare_tickers = [t.strip().upper() for t in compare_tickers.split(",")]
     comparison_data = {}
     fig = go.Figure()
-    
-    import random
+
+
     def get_random_color():
         return f"#{random.randint(0, 255):02x}{random.randint(0, 255):02x}{random.randint(0, 255):02x}"
-    
+
+
     for ticker in compare_tickers:
         result = predict_stock_movement(ticker, prediction_days)
         if result:
@@ -179,33 +183,33 @@ if st.sidebar.button("Compare Stocks"):
                 "Predicted Low ($)": low,
                 "Trend": movement
             }
-            
+
             color = get_random_color()
-            
+
             # Add stock price history to graph
             fig.add_trace(go.Scatter(
-                x=data.index, 
-                y=data["Close"], 
-                mode='lines', 
-                name=f"{ticker} Close Price", 
+                x=data.index,
+                y=data["Close"],
+                mode='lines',
+                name=f"{ticker} Close Price",
                 line=dict(color=color, width=2)
             ))
-            
+
             # Predict future dates for stock
             future_dates = pd.date_range(start=data.index[-1], periods=prediction_days + 1, freq='D')[1:]
-            
+
             # Add predicted prices to graph
             fig.add_trace(go.Scatter(
-                x=future_dates, 
-                y=predicted_prices, 
-                mode='lines', 
-                name=f"{ticker} Predicted Price", 
+                x=future_dates,
+                y=predicted_prices,
+                mode='lines',
+                name=f"{ticker} Predicted Price",
                 line=dict(color=color, dash='dash', width=2)
             ))
-    
+
     if comparison_data:
         st.write(pd.DataFrame.from_dict(comparison_data, orient='index'))
-        
+
         # Update chart layout
         fig.update_layout(
             title="Stock Price Comparison",
