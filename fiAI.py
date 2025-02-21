@@ -154,3 +154,24 @@ st.markdown("""
     <p style="color: #888888; font-size: 14px;">Made by FiAI-n1. Powered by Streamlit and Yahoo Finance.</p>
 </footer>
 """, unsafe_allow_html=True)
+
+st.sidebar.header("Stock Comparison")
+compare_tickers = st.sidebar.text_area("Enter tickers to compare (comma separated)", "AAPL, TSLA")
+if st.sidebar.button("Compare Stocks"):
+    compare_tickers = [t.strip().upper() for t in compare_tickers.split(",")]
+    comparison_data = {}
+    for ticker in compare_tickers:
+        result = predict_stock_movement(ticker, prediction_days)
+        if result:
+            stock_name, price, high, low, movement, _, _ = result
+            comparison_data[ticker] = {
+                "Stock Name": stock_name,
+                "Current Price ($)": price,
+                "Predicted High ($)": high,
+                "Predicted Low ($)": low,
+                "Trend": movement
+            }
+    if comparison_data:
+        st.write(pd.DataFrame.from_dict(comparison_data, orient='index'))
+    else:
+        st.error("❌ No valid stocks to compare.")
