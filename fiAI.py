@@ -156,7 +156,7 @@ if st.sidebar.button("Show Portfolio"):
 # Footer with styling
 st.markdown("""  
 <footer style="text-align: center; padding: 10px;">
-    <p style="color: #888888; font-size: 14px;">Made by FiAI-n2. Powered by Streamlit and Yahoo Finance.</p>
+    <p style="color: #888888; font-size: 14px;">Made by FiAI-n2, by Nethrum. Powered by Streamlit and Yahoo Finance.</p>
 </footer>
 """, unsafe_allow_html=True)
 
